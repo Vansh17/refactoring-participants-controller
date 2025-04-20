@@ -203,12 +203,15 @@ class Api::V1::ParticipantsController < ApplicationController
   # Checks if a target object (participant or participants) is not nil and then renders the object.
   # If the object is nil, renders the object errors and sends a not_found_status and if the object
   # exists, renders the object and sends a success status
+  # not_found_status default: :unprocessable_entity (422)
+  # success_status default: :ok (200)
   def render_object_or_error(object, not_found_status: :unprocessable_entity, success_status: :ok)
     if object.nil?
-      render json: object.errors, status: not_found_status
+      render json: { error: 'Resource not found' }, status: not_found_status
+    elsif object.respond_to?(:errors) && object.errors.any?
+      render json: object.errors, status: :unprocessable_entity
     else
       render json: object, status: success_status
-    end
   end
 
 end
