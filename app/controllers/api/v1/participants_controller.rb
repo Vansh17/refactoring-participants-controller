@@ -16,11 +16,8 @@ class Api::V1::ParticipantsController < ApplicationController
 
     participants = filter_participants_by_user(user)
 
-    if participants.nil?
-      render json: participants.errors, status: :unprocessable_entity
-    else
-      render json: participants, status: :ok
-    end
+    render_object_or_error(participants)
+
   end
 
   # GET /participants/assignment/:assignment_id
@@ -38,10 +35,8 @@ class Api::V1::ParticipantsController < ApplicationController
 
     participants = filter_participants_by_assignments(assignment)
 
-    if participants.nil?
-      render json: participants.errors, status: :unprocessable_entity
-    else
-      render json: participants, status: :ok
+    render_object_or_error(participants)
+
     end
   end
 
@@ -51,11 +46,8 @@ class Api::V1::ParticipantsController < ApplicationController
   def show
     participant = Participant.find(params[:id])
 
-    if participant.nil?
-      render json: participant.errors, status: :unprocessable_entity
-    else
-      render json: participant, status: :ok
-    end
+    render_object_or_error(participant)
+
   end
 
   # Assign the specified authorization to the participant and add them to an assignment
@@ -207,4 +199,16 @@ class Api::V1::ParticipantsController < ApplicationController
 
     authorization
   end
+
+  # Checks if a target object (participant or participants) is not nil and then renders the object.
+  # If the object is nil, renders the object errors and sends a not_found_status and if the object
+  # exists, renders the object and sends a success status
+  def render_object_or_error(object, not_found_status: :unprocessable_entity, success_status: :ok)
+    if object.nil?
+      render json: object.errors, status: not_found_status
+    else
+      render json: object, status: success_status
+    end
+  end
+
 end
